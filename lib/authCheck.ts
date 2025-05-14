@@ -1,17 +1,35 @@
 import { auth } from './firebase'
-import { signOut, onAuthStateChanged, sendEmailVerification, User } from 'firebase/auth'
+import {
+  signOut,
+  onAuthStateChanged,
+  sendEmailVerification,
+  User,
+} from 'firebase/auth'
 import { getUserRole } from './getUserRole'
 
-/**
- * Controleert of gebruiker ingelogd en geverifieerd is.
- * Geeft terug: { user, role } of redirect + uitloggen.
- */
-export async function requireVerifiedUser(
+let inactivityTimer: NodeJS.Timeout | null = null
+
+function startInactivityTimer(timeoutMs: number, router: any) {
+  if (inactivityTimer) clearTimeout(inactivityTimer)
+
+  inactivityTimer = setTimeout(async () => {
+    alert('Je bent automatisch uitgelogd wegens inactiviteit.')
+    await signOut(auth)
+    router.push('/login')
+  }, timeoutMs)
+}
+
+function resetInactivityTimer(timeoutMs: number, router: any) {
+  startInactivityTimer(timeoutMs, router)
+}
+
+export function requireVerifiedUser(
   router: any,
   setUser: (user: User) => void,
-  setRole: (role: string) => void
+  setRole: (role: string) => void,
+  timeoutMs: number = 10 * 60 * 1000 // standaard 10 minuten
 ) {
-  return onAuthStateChanged(auth, async (firebaseUser) => {
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
     if (!firebaseUser) {
       router.push('/login')
       return
@@ -24,8 +42,24 @@ export async function requireVerifiedUser(
       return
     }
 
+    // ✅ Timer starten bij login
     setUser(firebaseUser)
     const role = await getUserRole(firebaseUser.uid)
     setRole(role)
+    startInactivityTimer(timeoutMs, router)
+
+    // 🎯 Luister naar activiteit
+    const events = ['mousemove', 'keydown', 'click']
+    const reset = () => resetInactivityTimer(timeoutMs, router)
+    events.forEach((event) => window.addEventListener(event, reset))
+
+    // 🔁 Cleanup
+    return () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer)
+      events.forEach((event) => window.removeEventListener(event, reset))
+    }
   })
+
+  return unsubscribe
 }
+
