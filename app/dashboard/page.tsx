@@ -1,13 +1,13 @@
 'use client'
 
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { BookText, UserPlus, PencilLine } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { onAuthStateChanged, signOut, User } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
-import { getUserRole } from '@/lib/getUserRole'
+import { BookText, UserPlus, PencilLine } from 'lucide-react'
+import { User } from 'firebase/auth'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
+import { db, auth } from '@/lib/firebase'
+import { requireVerifiedUser } from '@/lib/authCheck'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -16,30 +16,32 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser)
-        const role = await getUserRole(firebaseUser.uid)
-        setRole(role)
+    const unsubscribe = requireVerifiedUser(router, setUser, setRole, 10 * 60 * 1000)
 
-        // ✅ Vluchten ophalen & tellen
-        const currentYear = new Date().getFullYear()
-        const flightsRef = collection(db, 'flights')
-        const snapshot = await getDocs(query(flightsRef, where('userId', '==', firebaseUser.uid)))
-
-        const flightsThisYear = snapshot.docs.filter(doc => {
-          const flight = doc.data()
-          const flightYear = new Date(flight.date).getFullYear()
-          return flightYear === currentYear
-        })
-
-        setStartsThisYear(flightsThisYear.length)
-      } else {
-        router.push('/login')
-      }
-    })
-    return () => unsubscribe()
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe()
+    }
   }, [router])
+
+  useEffect(() => {
+    const fetchStarts = async () => {
+      if (!user) return
+
+      const currentYear = new Date().getFullYear()
+      const flightsRef = collection(db, 'flights')
+      const snapshot = await getDocs(query(flightsRef, where('userId', '==', user.uid)))
+
+      const flightsThisYear = snapshot.docs.filter(doc => {
+        const flight = doc.data()
+        const flightYear = new Date(flight.date).getFullYear()
+        return flightYear === currentYear
+      })
+
+      setStartsThisYear(flightsThisYear.length)
+    }
+
+    fetchStarts()
+  }, [user])
 
   const handleLogout = async () => {
     await signOut(auth)
@@ -86,9 +88,13 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <button onClick={handleLogout} className="mt-6 bg-red-500 text-white px-4 py-2 rounded">
+      <button
+        onClick={handleLogout}
+        className="mt-6 bg-red-500 text-white px-4 py-2 rounded"
+      >
         Uitloggen
       </button>
     </div>
   )
 }
+
