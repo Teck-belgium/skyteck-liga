@@ -68,6 +68,7 @@ export default function AdminPage() {
           <option value="leerling">Leerling</option>
           <option value="instructeur">Instructeur</option>
           <option value="co-admin">Co-admin (liga)</option>
+          <option value="Sleeppiloot">Sleeppiloot</option>
         </select>
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
           Toevoegen aan Firestore
