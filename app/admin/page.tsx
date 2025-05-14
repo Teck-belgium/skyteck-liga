@@ -15,13 +15,10 @@ export default function AdminPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return router.push('/login')
-      const role = await getUserRole(user.uid)
-      setIsAdmin(role === 'admin')
-    })
-    return () => unsubscribe()
-  }, [router])
+  const unsubscribe = requireVerifiedUser(router, setUser, setRole)
+  return () => unsubscribe()
+}, [router])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
