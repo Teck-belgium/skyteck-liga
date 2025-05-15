@@ -1,6 +1,6 @@
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { getUserRole } from '@/lib/getUserRole'
 import { useAuth } from '@/context/AuthContext'
@@ -26,31 +26,25 @@ function startInactivityTimer(timeoutMs: number, router: any) {
   window.addEventListener('keydown', () => resetInactivityTimer(logout))
 }
 
-export function requireVerifiedUser() {
+export function useRequireVerifiedUser() {
   const router = useRouter()
   const { setUser, setRole } = useAuth()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        console.warn('❌ Geen ingelogde gebruiker')
         router.push('/login')
         return
       }
 
-      const isVerified = firebaseUser.emailVerified
-      if (!isVerified) {
-        console.warn('📧 E-mailadres is niet geverifieerd')
+      if (!firebaseUser.emailVerified) {
         await signOut(auth)
         router.push('/login')
         return
       }
 
       const uid = firebaseUser.uid
-
-      // ✅ Controleer expliciet of uid bestaat
       if (!uid) {
-        console.error('❌ Geen UID beschikbaar')
         await signOut(auth)
         router.push('/login')
         return
@@ -59,7 +53,7 @@ export function requireVerifiedUser() {
       setUser(firebaseUser)
 
       try {
-        const role = await getUserRole(uid) // ✅ uid is nu gegarandeerd string
+        const role = await getUserRole(uid)
         setRole(role)
       } catch (error) {
         console.error('⚠️ Fout bij ophalen van rol:', error)
