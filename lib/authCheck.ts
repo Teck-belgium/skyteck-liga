@@ -53,7 +53,7 @@ export function requireVerifiedUser(
       }
 
       setUser(firebaseUser)
-      const role = await getUserRole(firebaseUser.uid)
+      const role = await getUserRole(firebaseUser.uid as string)
       setRole(role)
 
       startInactivityTimer(timeoutMs, router)
