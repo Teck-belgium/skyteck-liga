@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
-import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,15 +21,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-blue-900 p-4">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md w-80">
-        <h2 className="text-xl font-bold text-white">Login</h2>
+    <div className="min-h-screen bg-blue-900 flex items-center justify-center">
+      <form
+        onSubmit={handleLogin}
+        className="bg-blue-800 text-white p-6 rounded shadow-md w-80"
+      >
+        <h2 className="text-xl font-bold mb-4">Login</h2>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          className="w-full p-2 border mb-2"
+          className="w-full p-2 mb-2 rounded text-black"
           required
         />
         <input
@@ -38,10 +40,10 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Wachtwoord"
-         className="w-full p-2 border border-blue-500 mb-4"
+          className="w-full p-2 mb-4 rounded text-black"
           required
         />
-        <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded">
+        <button type="submit" className="bg-white text-blue-900 font-semibold w-full p-2 rounded">
           Inloggen
         </button>
       </form>
