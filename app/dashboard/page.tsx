@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BookText, UserPlus, PencilLine } from 'lucide-react'
-import { User } from 'firebase/auth'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { User, onAuthStateChanged } from 'firebase/auth'
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { db, auth } from '@/lib/firebase'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
@@ -16,13 +16,29 @@ export default function DashboardPage() {
   const [startsThisYear, setStartsThisYear] = useState<number>(0)
   const router = useRouter()
 
+  // 🔐 Haal ingelogde gebruiker en rol op
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser)
 
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe()
-    }
-  }, [router])
+        const docRef = doc(db, 'users', currentUser.uid)
+        const userDoc = await getDoc(docRef)
 
+        if (userDoc.exists()) {
+          const data = userDoc.data()
+          setRole(data.role || null)
+        }
+      } else {
+        setUser(null)
+        setRole(null)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  // 📅 Tel starts dit jaar
   useEffect(() => {
     const fetchStarts = async () => {
       if (!user) return
@@ -43,6 +59,7 @@ export default function DashboardPage() {
     fetchStarts()
   }, [user])
 
+  // 🔓 Uitloggen
   const handleLogout = async () => {
     await signOut(auth)
     router.push('/login')
@@ -97,4 +114,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
