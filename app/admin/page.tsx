@@ -1,29 +1,25 @@
 'use client'
 
-import { requireVerifiedUser } from '../../lib/authCheck'
 import { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 import { doc, setDoc } from 'firebase/firestore'
 import { User } from 'firebase/auth'
+import { useAuth } from '@/context/AuthContext'
+import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
   const [email, setEmail] = useState('')
   const [uid, setUid] = useState('')
   const [role, setRole] = useState('piloot')
 
-  // ✅ Toevoegen van ontbrekende states
-  const [user, setUser] = useState<User | null>(null)
-  const [userRole, setUserRole] = useState('')
+  const { user, role: userRole } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
 
   const router = useRouter()
 
-  useEffect(() => {
-    const unsubscribe = requireVerifiedUser(router, setUser, setUserRole)
-
-    return () => unsubscribe()
-  }, [router])
+  // ✅ Gebruiker en rol automatisch ophalen en valideren
+  useRequireVerifiedUser()
 
   useEffect(() => {
     setIsAdmin(userRole === 'admin' || userRole === 'co-admin')
@@ -83,4 +79,3 @@ export default function AdminPage() {
     </div>
   )
 }
-
