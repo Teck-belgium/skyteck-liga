@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
@@ -29,22 +29,11 @@ function startInactivityTimer(timeoutMs: number, router: any) {
 export function useRequireVerifiedUser() {
   const router = useRouter()
   const { setUser, setRole } = useAuth()
+  const [checked, setChecked] = useState(false) // 👈 NIEUW
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        router.push('/login')
-        return
-      }
-
-      if (!firebaseUser.emailVerified) {
-        await signOut(auth)
-        router.push('/login')
-        return
-      }
-
-      const uid = firebaseUser.uid
-      if (!uid) {
+      if (!firebaseUser || !firebaseUser.emailVerified || !firebaseUser.uid) {
         await signOut(auth)
         router.push('/login')
         return
@@ -53,7 +42,7 @@ export function useRequireVerifiedUser() {
       setUser(firebaseUser)
 
       try {
-        const role = await getUserRole(uid)
+        const role = await getUserRole(firebaseUser.uid)
         setRole(role)
       } catch (error) {
         console.error('⚠️ Fout bij ophalen van rol:', error)
@@ -63,8 +52,11 @@ export function useRequireVerifiedUser() {
       }
 
       startInactivityTimer(timeoutMs, router)
+      setChecked(true) // ✅ Pas na alles OK
     })
 
     return () => unsubscribe()
   }, [router, setUser, setRole])
+
+  return checked
 }
