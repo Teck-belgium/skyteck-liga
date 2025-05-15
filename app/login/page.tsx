@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
+import { requireVerifiedUser } from '@/lib/authCheck'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
