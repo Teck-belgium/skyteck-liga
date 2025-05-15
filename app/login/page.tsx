@@ -37,7 +37,7 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Wachtwoord"
-          className="w-full p-2 border mb-4"
+         className="w-full p-2 border border-blue-500 mb-4"
           required
         />
         <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded">
