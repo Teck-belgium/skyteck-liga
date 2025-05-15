@@ -2,7 +2,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { auth } from '@/lib/firebase'
-import { getUserRole } from '@/lib/user'
+import { getUserRole } from '@/lib/getUserRole'
 import { useAuth } from '@/context/AuthContext'
 
 const timeoutMs = 15 * 60 * 1000 // 15 minuten
