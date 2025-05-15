@@ -7,7 +7,7 @@ import { User } from 'firebase/auth'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { db, auth } from '@/lib/firebase'
-import { requireVerifiedUser } from '@/lib/authCheck'
+import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -16,7 +16,7 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = requireVerifiedUser(router, setUser, setRole, 10 * 60 * 1000)
+    const unsubscribe = useRequireVerifiedUser(router, setUser, setRole, 10 * 60 * 1000)
 
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe()
