@@ -33,11 +33,11 @@ export function useRequireVerifiedUser() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser || !firebaseUser.emailVerified || !firebaseUser.uid) {
-        await signOut(auth)
-        router.push('/login')
-        return
-      }
+    //  if (!firebaseUser || !firebaseUser.emailVerified || !firebaseUser.uid) {
+    //    await signOut(auth)
+    //    router.push('/login')
+    //    return
+    //   }
 
       setUser(firebaseUser)
 
