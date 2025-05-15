@@ -1,7 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
+} from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 
@@ -9,18 +13,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [unverifiedUser, setUnverifiedUser] = useState<any>(null)
+  const [infoMessage, setInfoMessage] = useState('')
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage('')
+    setInfoMessage('')
+    setUnverifiedUser(null)
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
       if (!user.emailVerified) {
-        await signOut(auth) // onmiddellijk uitloggen
+        setUnverifiedUser(user)
+        await signOut(auth)
         setErrorMessage('✉️ Je e-mailadres is nog niet geverifieerd. Controleer je inbox.')
         return
       }
@@ -28,6 +37,16 @@ export default function LoginPage() {
       router.push('/dashboard')
     } catch (error: any) {
       setErrorMessage('Login mislukt. Controleer je gegevens.')
+    }
+  }
+
+  const handleResendVerification = async () => {
+    if (!unverifiedUser) return
+    try {
+      await sendEmailVerification(unverifiedUser)
+      setInfoMessage('✅ Verificatie-e-mail opnieuw verzonden. Controleer je inbox.')
+    } catch (error) {
+      setErrorMessage('❌ Er ging iets mis bij het verzenden van de verificatiemail.')
     }
   }
 
@@ -42,6 +61,12 @@ export default function LoginPage() {
         {errorMessage && (
           <div className="bg-red-600 text-white p-2 mb-4 rounded text-sm">
             {errorMessage}
+          </div>
+        )}
+
+        {infoMessage && (
+          <div className="bg-green-600 text-white p-2 mb-4 rounded text-sm">
+            {infoMessage}
           </div>
         )}
 
@@ -67,6 +92,16 @@ export default function LoginPage() {
         >
           Inloggen
         </button>
+
+        {unverifiedUser && (
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            className="mt-4 text-sm underline text-white hover:text-blue-300"
+          >
+            📩 Verificatiemail opnieuw versturen
+          </button>
+        )}
       </form>
     </div>
   )
