@@ -24,15 +24,11 @@ function resetInactivityTimer(timeoutMs: number, router: any) {
   startInactivityTimer(timeoutMs, router)
 }
 
-/**
- * Zorgt ervoor dat een gebruiker ingelogd en geverifieerd is.
- * Start automatisch uitlogtimer en geeft role + user terug.
- */
 export function requireVerifiedUser(
   router: any,
   setUser: (user: User) => void,
   setRole: (role: string) => void,
-  timeoutMs: number = 10 * 60 * 1000 // standaard 10 minuten
+  timeoutMs: number = 10 * 60 * 1000
 ) {
   const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
     if (!firebaseUser) {
@@ -48,20 +44,24 @@ export function requireVerifiedUser(
     }
 
     try {
-      // ✅ Gebruiker is ingelogd en geverifieerd
-      setUser(firebaseUser)
+      // ✅ Extra beveiliging
+      if (!firebaseUser.uid) {
+        console.error('Gebruiker heeft geen UID.')
+        await signOut(auth)
+        router.push('/login')
+        return
+      }
 
+      setUser(firebaseUser)
       const role = await getUserRole(firebaseUser.uid)
       setRole(role)
 
       startInactivityTimer(timeoutMs, router)
 
-      // 🎯 Luister naar activiteit
       const events = ['mousemove', 'keydown', 'click']
       const reset = () => resetInactivityTimer(timeoutMs, router)
       events.forEach((event) => window.addEventListener(event, reset))
 
-      // 🔁 Cleanup functie bij unmount
       return () => {
         if (inactivityTimer) clearTimeout(inactivityTimer)
         events.forEach((event) => window.removeEventListener(event, reset))
