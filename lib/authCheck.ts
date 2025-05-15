@@ -1,4 +1,5 @@
 // lib/authCheck.ts
+
 import { auth } from './firebase'
 import {
   signOut,
@@ -44,16 +45,18 @@ export function requireVerifiedUser(
     }
 
     try {
-      const uid = firebaseUser.uid
-      if (!uid) {
-        console.error('Gebruiker heeft geen UID.')
+      const uid = firebaseUser?.uid
+      if (typeof uid !== 'string') {
+        console.error('Gebruiker heeft geen geldige UID.')
         await signOut(auth)
         router.push('/login')
         return
       }
 
       setUser(firebaseUser)
-      const role = await getUserRole(uid) // ✅ uid is hier altijd een string
+
+      // ✅ TypeScript weet nu zeker dat `uid` een string is
+      const role = await getUserRole(uid)
       setRole(role)
 
       startInactivityTimer(timeoutMs, router)
