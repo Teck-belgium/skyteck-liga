@@ -1,53 +1,56 @@
-// lib/authCheck.ts
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { auth } from '@/lib/firebase'
+import { getUserRole } from '@/lib/user'
+import { useAuth } from '@/context/AuthContext'
 
-import { auth } from './firebase'
-import {
-  signOut,
-  onAuthStateChanged,
-  sendEmailVerification,
-  User,
-} from 'firebase/auth'
-import { getUserRole } from './getUserRole'
+const timeoutMs = 15 * 60 * 1000 // 15 minuten
+let inactivityTimer: NodeJS.Timeout
 
-let inactivityTimer: NodeJS.Timeout | null = null
+function resetInactivityTimer(callback: () => void) {
+  clearTimeout(inactivityTimer)
+  inactivityTimer = setTimeout(callback, timeoutMs)
+}
 
 function startInactivityTimer(timeoutMs: number, router: any) {
-  if (inactivityTimer) clearTimeout(inactivityTimer)
-
-  inactivityTimer = setTimeout(async () => {
-    alert('Je bent automatisch uitgelogd wegens inactiviteit.')
+  const logout = async () => {
+    console.log('⏳ Automatisch uitgelogd wegens inactiviteit')
     await signOut(auth)
     router.push('/login')
-  }, timeoutMs)
+  }
+
+  resetInactivityTimer(logout)
+
+  window.addEventListener('mousemove', () => resetInactivityTimer(logout))
+  window.addEventListener('keydown', () => resetInactivityTimer(logout))
 }
 
-function resetInactivityTimer(timeoutMs: number, router: any) {
-  startInactivityTimer(timeoutMs, router)
-}
+export function requireVerifiedUser() {
+  const router = useRouter()
+  const { setUser, setRole } = useAuth()
 
-export function requireVerifiedUser(
-  router: any,
-  setUser: (user: User) => void,
-  setRole: (role: string) => void,
-  timeoutMs: number = 10 * 60 * 1000
-) {
-  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    if (!firebaseUser) {
-      router.push('/login')
-      return
-    }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        console.warn('❌ Geen ingelogde gebruiker')
+        router.push('/login')
+        return
+      }
 
-    if (!firebaseUser.emailVerified) {
-      alert('Bevestig je e-mailadres via de link in je mail.')
-      await sendEmailVerification(firebaseUser)
-      await signOut(auth)
-      return
-    }
+      const isVerified = firebaseUser.emailVerified
+      if (!isVerified) {
+        console.warn('📧 E-mailadres is niet geverifieerd')
+        await signOut(auth)
+        router.push('/login')
+        return
+      }
 
-    try {
-      const uid = firebaseUser?.uid
-      if (typeof uid !== 'string') {
-        console.error('Gebruiker heeft geen geldige UID.')
+      const uid = firebaseUser.uid
+
+      // ✅ Controleer expliciet of uid bestaat
+      if (!uid) {
+        console.error('❌ Geen UID beschikbaar')
         await signOut(auth)
         router.push('/login')
         return
@@ -55,26 +58,19 @@ export function requireVerifiedUser(
 
       setUser(firebaseUser)
 
-      // ✅ TypeScript weet nu zeker dat `uid` een string is
-      const role = await getUserRole(uid)
-      setRole(role)
+      try {
+        const role = await getUserRole(uid) // ✅ uid is nu gegarandeerd string
+        setRole(role)
+      } catch (error) {
+        console.error('⚠️ Fout bij ophalen van rol:', error)
+        await signOut(auth)
+        router.push('/login')
+        return
+      }
 
       startInactivityTimer(timeoutMs, router)
+    })
 
-      const events = ['mousemove', 'keydown', 'click']
-      const reset = () => resetInactivityTimer(timeoutMs, router)
-      events.forEach((event) => window.addEventListener(event, reset))
-
-      return () => {
-        if (inactivityTimer) clearTimeout(inactivityTimer)
-        events.forEach((event) => window.removeEventListener(event, reset))
-      }
-    } catch (error) {
-      console.error('Fout bij ophalen rol:', error)
-      await signOut(auth)
-      router.push('/login')
-    }
-  })
-
-  return unsubscribe
+    return () => unsubscribe()
+  }, [router, setUser, setRole])
 }
