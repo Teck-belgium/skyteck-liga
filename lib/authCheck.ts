@@ -29,15 +29,15 @@ function startInactivityTimer(timeoutMs: number, router: any) {
 export function useRequireVerifiedUser() {
   const router = useRouter()
   const { setUser, setRole } = useAuth()
-  const [checked, setChecked] = useState(false) // 👈 NIEUW
+  const [checked, setChecked] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    //  if (!firebaseUser || !firebaseUser.emailVerified || !firebaseUser.uid) {
-    //    await signOut(auth)
-    //    router.push('/login')
-    //    return
-    //   }
+      if (!firebaseUser || !firebaseUser.emailVerified) {
+        await signOut(auth)
+        router.push('/login')
+        return
+      }
 
       setUser(firebaseUser)
 
@@ -52,7 +52,7 @@ export function useRequireVerifiedUser() {
       }
 
       startInactivityTimer(timeoutMs, router)
-      setChecked(true) // ✅ Pas na alles OK
+      setChecked(true)
     })
 
     return () => unsubscribe()
