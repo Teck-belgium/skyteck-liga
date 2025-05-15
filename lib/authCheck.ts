@@ -44,16 +44,16 @@ export function requireVerifiedUser(
     }
 
     try {
-      // ✅ Extra beveiliging
-      if (!firebaseUser.uid) {
-        console.error('Gebruiker heeft geen UID.')
+      // ✅ Extra beveiliging + TypeScript fix
+      if (!firebaseUser.uid || typeof firebaseUser.uid !== 'string') {
+        console.error('Gebruiker heeft geen geldige UID.')
         await signOut(auth)
         router.push('/login')
         return
       }
 
       setUser(firebaseUser)
-      const role = await getUserRole(firebaseUser.uid as string)
+      const role = await getUserRole(firebaseUser.uid)
       setRole(role)
 
       startInactivityTimer(timeoutMs, router)
