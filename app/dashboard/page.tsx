@@ -65,17 +65,6 @@ export default function DashboardPage() {
           <span className="text-sm">Logboek</span>
         </button>
 
-        {/* Lid toevoegen (alleen voor admins) */}
-        {role === 'admin' && (
-          <button
-            onClick={() => router.push('/admin')}
-            className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
-          >
-            <UserPlus className="h-6 w-6 mb-1 text-blue-600" />
-            <span className="text-sm">Lid toevoegen</span>
-          </button>
-        )}
-
         {/* Vluchten ingeven (admin + co-admin) */}
         {['admin', 'co-admin'].includes(role || '') && (
           <button
@@ -84,6 +73,17 @@ export default function DashboardPage() {
           >
             <PencilLine className="h-6 w-6 mb-1 text-green-600" />
             <span className="text-sm text-center">Vluchten ingeven</span>
+          </button>
+        )}
+
+        {/* Lid toevoegen (alleen voor admins) */}
+        {role === 'admin' && (
+          <button
+            onClick={() => router.push('/admin')}
+            className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
+          >
+            <UserPlus className="h-6 w-6 mb-1 text-blue-600" />
+            <span className="text-sm">Lid toevoegen</span>
           </button>
         )}
       </div>
