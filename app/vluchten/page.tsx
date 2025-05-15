@@ -5,7 +5,7 @@ import { auth, db } from '@/lib/firebase'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
-import { requireVerifiedUser } from '@/lib/authCheck'
+import { useRequireVerifiedUser } from '@/lib/authCheck''
 
 export default function VluchtenPage() {
   const [userId, setUserId] = useState('')
