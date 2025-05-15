@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getUserRole } from '@/lib/getUserRole'
+import { requireVerifiedUser } from '@/lib/authCheck'
 
 interface Flight {
   id: string
