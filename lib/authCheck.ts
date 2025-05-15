@@ -1,3 +1,4 @@
+// lib/authCheck.ts
 import { auth } from './firebase'
 import {
   signOut,
@@ -23,6 +24,10 @@ function resetInactivityTimer(timeoutMs: number, router: any) {
   startInactivityTimer(timeoutMs, router)
 }
 
+/**
+ * Zorgt ervoor dat een gebruiker ingelogd en geverifieerd is.
+ * Start automatisch uitlogtimer en geeft role + user terug.
+ */
 export function requireVerifiedUser(
   router: any,
   setUser: (user: User) => void,
@@ -42,24 +47,31 @@ export function requireVerifiedUser(
       return
     }
 
-    // ✅ Timer starten bij login
-    setUser(firebaseUser)
-    const role = await getUserRole(firebaseUser.uid)
-    setRole(role)
-    startInactivityTimer(timeoutMs, router)
+    try {
+      // ✅ Gebruiker is ingelogd en geverifieerd
+      setUser(firebaseUser)
 
-    // 🎯 Luister naar activiteit
-    const events = ['mousemove', 'keydown', 'click']
-    const reset = () => resetInactivityTimer(timeoutMs, router)
-    events.forEach((event) => window.addEventListener(event, reset))
+      const role = await getUserRole(firebaseUser.uid)
+      setRole(role)
 
-    // 🔁 Cleanup
-    return () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer)
-      events.forEach((event) => window.removeEventListener(event, reset))
+      startInactivityTimer(timeoutMs, router)
+
+      // 🎯 Luister naar activiteit
+      const events = ['mousemove', 'keydown', 'click']
+      const reset = () => resetInactivityTimer(timeoutMs, router)
+      events.forEach((event) => window.addEventListener(event, reset))
+
+      // 🔁 Cleanup functie bij unmount
+      return () => {
+        if (inactivityTimer) clearTimeout(inactivityTimer)
+        events.forEach((event) => window.removeEventListener(event, reset))
+      }
+    } catch (error) {
+      console.error('Fout bij ophalen rol:', error)
+      await signOut(auth)
+      router.push('/login')
     }
   })
 
   return unsubscribe
 }
-
