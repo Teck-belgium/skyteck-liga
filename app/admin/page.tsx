@@ -1,6 +1,6 @@
 'use client'
 
-import { requireVerifiedUser } from 'lib/authCheck.ts'
+import { requireVerifiedUser } from 'lib/authCheck'
 import { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
