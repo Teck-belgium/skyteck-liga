@@ -3,23 +3,31 @@
 import { requireVerifiedUser } from '../../lib/authCheck'
 import { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import { doc, setDoc } from 'firebase/firestore'
-import { getUserRole } from '@/lib/getUserRole'
+import { User } from 'firebase/auth'
 
 export default function AdminPage() {
   const [email, setEmail] = useState('')
   const [uid, setUid] = useState('')
   const [role, setRole] = useState('piloot')
+
+  // ✅ Toevoegen van ontbrekende states
+  const [user, setUser] = useState<User | null>(null)
+  const [userRole, setUserRole] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
-  const unsubscribe = requireVerifiedUser(router, setUser, setRole)
-  return () => unsubscribe()
-}, [router])
+    const unsubscribe = requireVerifiedUser(router, setUser, setUserRole)
 
+    return () => unsubscribe()
+  }, [router])
+
+  useEffect(() => {
+    setIsAdmin(userRole === 'admin' || userRole === 'co-admin')
+  }, [userRole])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,3 +83,4 @@ export default function AdminPage() {
     </div>
   )
 }
+
