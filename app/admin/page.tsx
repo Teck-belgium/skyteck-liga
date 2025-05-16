@@ -8,23 +8,14 @@ import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
-  // ✅ Gebruiker verifiëren en auto-logout starten
-  useRequireVerifiedUser()
-
-  // ✅ AuthContext ophalen
+  const checked = useRequireVerifiedUser() // ✅ Wachten tot alles is geladen
   const { user, role: userRole } = useAuth()
-  const [isAdmin, setIsAdmin] = useState(false)
 
   const [email, setEmail] = useState('')
   const [uid, setUid] = useState('')
   const [role, setRole] = useState('piloot')
 
   const router = useRouter()
-
-  // ✅ Adminrechten controleren
-  useEffect(() => {
-    setIsAdmin(userRole === 'admin' || userRole === 'co-admin')
-  }, [userRole])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,12 +36,19 @@ export default function AdminPage() {
     }
   }
 
-  if (!isAdmin) {
+  // ⏳ Nog aan het laden?
+  if (!checked) {
+    return <p className="p-6 text-white">🔄 Laden...</p>
+  }
+
+  // 🚫 Geen toegang?
+  if (userRole !== 'admin' && userRole !== 'co-admin') {
     return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
   }
 
+  // ✅ Toegang verleend
   return (
-    <div className="p-6 max-w-md mx-auto">
+    <div className="p-6 max-w-md mx-auto text-white">
       <h1 className="text-2xl font-bold mb-4">👤 Gebruiker toevoegen</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -58,16 +56,16 @@ export default function AdminPage() {
           placeholder="Firebase UID"
           value={uid}
           onChange={(e) => setUid(e.target.value)}
-          className="border p-2 w-full"
+          className="border p-2 w-full bg-black text-white"
         />
         <input
           type="email"
           placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 w-full"
+          className="border p-2 w-full bg-black text-white"
         />
-        <select value={role} onChange={(e) => setRole(e.target.value)} className="border p-2 w-full">
+        <select value={role} onChange={(e) => setRole(e.target.value)} className="border p-2 w-full bg-black text-white">
           <option value="admin">Admin</option>
           <option value="co-admin">Co-admin (liga)</option>
           <option value="piloot">Piloot</option>
