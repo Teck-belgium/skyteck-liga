@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
-  const checked = useRequireVerifiedUser() // ✅ Wachten tot alles is geladen
+  const checked = useRequireVerifiedUser() // ✅ Wacht tot auth & verificatie geladen zijn
   const { user, role: userRole } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -19,13 +19,29 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !uid || !role) return alert('Alles invullen!')
+
+    if (!email || !uid || !role) {
+      return alert('⚠️ Alles invullen!')
+    }
+
+    if (uid.length < 10) {
+      return alert('⚠️ UID lijkt ongeldig!')
+    }
 
     try {
-      await setDoc(doc(db, 'users', uid), {
+      const userRef = doc(db, 'users', uid)
+      const existingUser = await getDoc(userRef)
+
+      if (existingUser.exists()) {
+        return alert('⚠️ Deze gebruiker bestaat al!')
+      }
+
+      await setDoc(userRef, {
         email,
         role,
+        createdAt: new Date().toISOString(), // ⏱️ metadata
       })
+
       alert('✅ Gebruiker succesvol toegevoegd!')
       setEmail('')
       setUid('')
@@ -36,17 +52,17 @@ export default function AdminPage() {
     }
   }
 
-  // ⏳ Nog aan het laden?
+  // ⏳ Nog aan het laden
   if (!checked) {
     return <p className="p-6 text-white">🔄 Laden...</p>
   }
 
-  // 🚫 Geen toegang?
+  // 🚫 Geen admin?
   if (userRole !== 'admin' && userRole !== 'co-admin') {
     return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
   }
 
-  // ✅ Toegang verleend
+  // ✅ Toegang toegestaan
   return (
     <div className="p-6 max-w-md mx-auto text-white">
       <h1 className="text-2xl font-bold mb-4">👤 Gebruiker toevoegen</h1>
@@ -65,7 +81,11 @@ export default function AdminPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="border p-2 w-full bg-black text-white"
         />
-        <select value={role} onChange={(e) => setRole(e.target.value)} className="border p-2 w-full bg-black text-white">
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="border p-2 w-full bg-black text-white"
+        >
           <option value="admin">Admin</option>
           <option value="co-admin">Co-admin (liga)</option>
           <option value="piloot">Piloot</option>
