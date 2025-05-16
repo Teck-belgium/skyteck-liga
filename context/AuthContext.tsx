@@ -11,6 +11,7 @@ type AuthContextType = {
   setUser: (user: User | null) => void
   role: string | null
   setRole: (role: string | null) => void
+  loading: boolean
 }
 
 // Context aanmaken
@@ -19,12 +20,14 @@ const AuthContext = createContext<AuthContextType>({
   setUser: () => {},
   role: null,
   setRole: () => {},
+  loading: true,
 })
 
 // Provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -47,13 +50,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setRole(null)
       }
+
+      setLoading(false)
     })
 
     return () => unsubscribe()
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, setUser, role, setRole }}>
+    <AuthContext.Provider value={{ user, setUser, role, setRole, loading }}>
       {children}
     </AuthContext.Provider>
   )
