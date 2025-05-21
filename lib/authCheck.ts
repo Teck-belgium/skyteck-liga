@@ -43,7 +43,15 @@ export function useRequireVerifiedUser() {
 
       try {
         const roles = await getUserRole(firebaseUser.uid)
-        setRoles(Array.isArray(roles) ? roles : [roles])
+
+        // Zorg dat roles altijd een string[] is, zonder null/undefined
+        setRoles(
+          Array.isArray(roles)
+            ? roles.filter((r): r is string => typeof r === 'string')
+            : typeof roles === 'string'
+              ? [roles]
+              : []
+        )
       } catch (error) {
         console.error('⚠️ Fout bij ophalen van rol:', error)
         await signOut(auth)
