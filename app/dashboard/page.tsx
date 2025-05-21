@@ -12,7 +12,7 @@ import { useRequireVerifiedUser } from '@/lib/authCheck'
 export default function DashboardPage() {
   useRequireVerifiedUser()
   const [user, setUser] = useState<User | null>(null)
-  const [role, setRole] = useState<string | null>(null)
+  const [roles, setRoles] = useState<string | null>(null)
   const [startsThisYear, setStartsThisYear] = useState<number>(0)
   const router = useRouter()
 
