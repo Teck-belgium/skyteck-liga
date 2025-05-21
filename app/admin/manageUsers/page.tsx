@@ -73,6 +73,7 @@ export default function ManageUsersPage() {
   if (error) return <p className="p-6 text-red-500">{error}</p>
 
   const roleOptions = [
+    'hoofd-admin',
     'admin',
     'co-admin',
     'piloot',
