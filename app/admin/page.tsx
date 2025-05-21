@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
@@ -12,49 +12,68 @@ export default function AdminPage() {
   const { user, role: userRole, loading } = useAuth()
 
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('') // Nieuw wachtwoordveld
-  const [uid, setUid] = useState('')
-  const [role, setRole] = useState('piloot')
+  const [roles, setRoles] = useState<string[]>([])
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const router = useRouter()
+
+  const roleOptions = [
+    'admin',
+    'co-admin',
+    'piloot',
+    'leerling',
+    'instructeur',
+    'Sleeppiloot',
+  ]
+
+  const toggleRole = (role: string) => {
+    if (roles.includes(role)) {
+      setRoles(roles.filter((r) => r !== role))
+    } else {
+      setRoles([...roles, role])
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || !password || !role) {
-      return alert('⚠️ Alles invullen!')
+    if (!email || roles.length === 0) {
+      alert('⚠️ Vul een e-mail in en kies minstens één rol.')
+      return
     }
 
+    setIsSubmitting(true)
+    setMessage('')
+
     try {
-      // ✅ Maak gebruiker aan in Firebase Authentication via Cloud Function of Admin SDK via backend
+      // ✅ Stuur e-mail + rollen naar backend
       const res = await fetch('/api/createUser', {
         method: 'POST',
-        body: JSON.stringify({ email, password, role }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, roles }),
       })
 
       const data = await res.json()
-
-      if (!res.ok) throw new Error(data.message || 'Fout bij maken van gebruiker')
+      if (!res.ok) throw new Error(data.message)
 
       const { uid } = data
 
       // ✅ Voeg toe aan Firestore
       await setDoc(doc(db, 'users', uid), {
         email,
-        role,
+        roles,
         createdAt: new Date().toISOString(),
       })
 
-      alert('✅ Gebruiker aangemaakt!')
+      setMessage('✅ Gebruiker toegevoegd en mail verzonden!')
       setEmail('')
-      setPassword('')
-      setRole('piloot')
-    } catch (err) {
+      setRoles([])
+    } catch (err: any) {
       console.error('❌ Fout bij toevoegen:', err)
-      alert('Fout bij toevoegen!')
+      setMessage('❌ Fout: ' + err.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -69,6 +88,7 @@ export default function AdminPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto text-white">
       <h1 className="text-2xl font-bold mb-6">👥 Lid toevoegen</h1>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Linker kolom */}
         <div className="space-y-4">
@@ -78,40 +98,37 @@ export default function AdminPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="border p-2 w-full bg-black text-white"
-          />
-          <input
-            type="password"
-            placeholder="Wachtwoord"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 w-full bg-black text-white"
+            required
           />
         </div>
 
         {/* Rechter kolom */}
         <div className="space-y-4">
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="border p-2 w-full bg-black text-white"
-          >
-            <option value="admin">Admin</option>
-            <option value="co-admin">Co-admin (liga)</option>
-            <option value="piloot">Piloot</option>
-            <option value="leerling">Leerling</option>
-            <option value="instructeur">Instructeur</option>
-            <option value="Sleeppiloot">Sleeppiloot</option>
-          </select>
+          <p className="font-medium">📌 Rollen</p>
+          <div className="flex flex-wrap gap-4">
+            {roleOptions.map((role) => (
+              <label key={role} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={roles.includes(role)}
+                  onChange={() => toggleRole(role)}
+                />
+                {role}
+              </label>
+            ))}
+          </div>
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="bg-blue-600 text-white px-4 py-2 rounded w-full"
           >
-            Toevoegen aan Firebase
+            {isSubmitting ? 'Bezig...' : 'Toevoegen aan Firebase'}
           </button>
         </div>
       </form>
+
+      {message && <p className="mt-4">{message}</p>}
     </div>
   )
 }
-
