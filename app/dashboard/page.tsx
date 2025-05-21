@@ -27,11 +27,11 @@ export default function DashboardPage() {
 
         if (userDoc.exists()) {
           const data = userDoc.data()
-          setRole(data.role || null)
+          setRoles(data.role || null)
         }
       } else {
         setUser(null)
-        setRole(null)
+        setRoles(null)
       }
     })
 
