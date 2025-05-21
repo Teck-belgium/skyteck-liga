@@ -28,7 +28,7 @@ function startInactivityTimer(timeoutMs: number, router: any) {
 
 export function useRequireVerifiedUser() {
   const router = useRouter()
-  const { setUser, setRole } = useAuth()
+  const { setUser, setRoles } = useAuth()
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
@@ -42,8 +42,8 @@ export function useRequireVerifiedUser() {
       setUser(firebaseUser)
 
       try {
-        const role = await getUserRole(firebaseUser.uid)
-        setRole(role)
+        const roles = await getUserRole(firebaseUser.uid)
+        setRoles(roles)
       } catch (error) {
         console.error('⚠️ Fout bij ophalen van rol:', error)
         await signOut(auth)
@@ -56,7 +56,7 @@ export function useRequireVerifiedUser() {
     })
 
     return () => unsubscribe()
-  }, [router, setUser, setRole])
+  }, [router, setUser, setRoles])
 
   return checked
 }
