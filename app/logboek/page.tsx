@@ -88,7 +88,7 @@ export default function LogboekPage() {
 
               <div className="flex gap-2 mt-2">
                 {/* Alleen leden mogen hun eigen opmerking aanpassen */}
-                {role !== 'admin' && flight.userId === userId && (
+                {roles !== 'admin' && flight.userId === userId && (
                   <Link
                     href={`/vluchten/${flight.id}/edit-remark`}
                     className="text-sm text-blue-600 underline"
@@ -98,7 +98,7 @@ export default function LogboekPage() {
                 )}
 
                 {/* Alleen admins zien bewerk + verwijder knoppen */}
-                {role === 'admin' && (
+                {roles === 'admin' && (
                   <>
                     <Link
                       href={`/vluchten/${flight.id}/edit`}
