@@ -14,7 +14,7 @@ type UserData = {
 
 export default function ManageUsersPage() {
   const checked = useRequireVerifiedUser()
-  const { role: userRole, loading } = useAuth()
+  const { roles: userRoles, loading } = useAuth()
 
   const [users, setUsers] = useState<UserData[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -23,7 +23,7 @@ export default function ManageUsersPage() {
   useEffect(() => {
     if (!checked || loading) return
 
-    if (userRole !== 'admin' && userRole !== 'co-admin') {
+    if (userRoles !== 'admin' && userRoles !== 'co-admin') {
       setError('⛔ Alleen admins mogen deze pagina zien.')
       return
     }
