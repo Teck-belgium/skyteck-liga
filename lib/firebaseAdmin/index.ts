@@ -1,6 +1,9 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import serviceAccount from './serviceAccountKey.json'
+import type { ServiceAccount } from 'firebase-admin'
+import serviceAccount from './serviceAccountKey.json' assert { type: 'json' }
+
+const serviceAccountTyped = serviceAccount as ServiceAccount
 
 if (!getApps().length) {
   if (
@@ -19,7 +22,7 @@ if (!getApps().length) {
   } else {
     // Lokaal: init met serviceAccountKey.json
     initializeApp({
-      credential: cert(serviceAccount),
+      credential: cert(serviceAccountTyped),
     })
   }
 }
