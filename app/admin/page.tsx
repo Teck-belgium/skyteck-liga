@@ -8,8 +8,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
-  const checked = useRequireVerifiedUser() // ✅ Wacht tot auth & verificatie geladen zijn
-  const { user, role: userRole } = useAuth()
+  const checked = useRequireVerifiedUser() // ✅ Verificatiecontrole
+  const { user, role: userRole, loading } = useAuth() // ✅ loading toegevoegd
 
   const [email, setEmail] = useState('')
   const [uid, setUid] = useState('')
@@ -52,9 +52,9 @@ export default function AdminPage() {
     }
   }
 
-  // ⏳ Nog aan het laden
-  if (!checked) {
-    return <p className="p-6 text-white">🔄 Laden...</p>
+  // ⏳ Nog bezig met laden van auth of verificatie
+  if (!checked || loading || userRole === null) {
+    return <p className="p-6 text-white">🔄 Bezig met laden...</p>
   }
 
   // 🚫 Geen admin?
@@ -100,3 +100,4 @@ export default function AdminPage() {
     </div>
   )
 }
+
