@@ -23,10 +23,11 @@ export default function ManageUsersPage() {
   useEffect(() => {
     if (!checked || loading) return
 
-    if (userRoles !== 'admin' && userRoles !== 'co-admin') {
-      setError('⛔ Alleen admins mogen deze pagina zien.')
-      return
-    }
+    if (!userRoles.includes('admin') && !userRoles.includes('co-admin')) {
+  setError('⛔ Alleen admins mogen deze pagina zien.')
+  return
+}
+
 
     const fetchUsers = async () => {
       setLoadingUsers(true)
