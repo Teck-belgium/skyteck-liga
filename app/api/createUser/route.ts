@@ -1,32 +1,25 @@
 import { NextResponse } from 'next/server'
-import { initializeApp, cert } from 'firebase-admin/app'
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
+import serviceAccount from '../../../lib/firebaseAdmin/serviceAccountKey.json' assert { type: 'json' }
 
-// 🔐 Je service account JSON vanuit Firebase
-const serviceAccount = {
-  projectId: 'jouw-project-id',
-  clientEmail: '...',
-  privateKey: '...',
-}
-
-// Initialiseer Admin SDK (alleen 1x)
-try {
+if (!getApps().length) {
   initializeApp({
     credential: cert(serviceAccount),
   })
-} catch (_) {
-  // App bestaat al
 }
 
+const auth = getAuth()
+
 export async function POST(req: Request) {
-  const { email, password, role } = await req.json()
+  const { email, password } = await req.json()
 
   if (!email || !password) {
     return NextResponse.json({ message: 'Email en wachtwoord zijn verplicht' }, { status: 400 })
   }
 
   try {
-    const userRecord = await getAuth().createUser({
+    const userRecord = await auth.createUser({
       email,
       password,
     })
