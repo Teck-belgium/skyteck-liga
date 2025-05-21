@@ -80,7 +80,7 @@ export default function AdminPage() {
     return <p className="p-6 text-white">🔄 Bezig met laden...</p>
   }
 
-  if (!roles.includes('admin') && !roles.includes('co-admin')) {
+  if (!roles.includes('admin') && !roles.includes('co-admin') && !roles.includes('hoofd-admin')) {
     return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
   }
 
