@@ -24,7 +24,7 @@ interface Flight {
 export default function LogboekPage() {
   const [flights, setFlights] = useState<Flight[]>([])
   const [userId, setUserId] = useState<string>('')
-  const [role, setRole] = useState<string | null>(null)
+  const [roles, setRoles] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
