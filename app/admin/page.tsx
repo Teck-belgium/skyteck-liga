@@ -9,10 +9,10 @@ import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
   const checked = useRequireVerifiedUser()
-  const { user, role: userRole, loading } = useAuth()
+  const { user, roles, loading } = useAuth()
 
   const [email, setEmail] = useState('')
-  const [roles, setRoles] = useState<string[]>([])
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -28,17 +28,17 @@ export default function AdminPage() {
   ]
 
   const toggleRole = (role: string) => {
-    if (roles.includes(role)) {
-      setRoles(roles.filter((r) => r !== role))
+    if (selectedRoles.includes(role)) {
+      setSelectedRoles(selectedRoles.filter((r) => r !== role))
     } else {
-      setRoles([...roles, role])
+      setSelectedRoles([...selectedRoles, role])
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || roles.length === 0) {
+    if (!email || selectedRoles.length === 0) {
       alert('⚠️ Vul een e-mail in en kies minstens één rol.')
       return
     }
@@ -47,11 +47,10 @@ export default function AdminPage() {
     setMessage('')
 
     try {
-      // ✅ Stuur e-mail + rollen naar backend
       const res = await fetch('/api/createUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, roles }),
+        body: JSON.stringify({ email, roles: selectedRoles }),
       })
 
       const data = await res.json()
@@ -59,16 +58,15 @@ export default function AdminPage() {
 
       const { uid } = data
 
-      // ✅ Voeg toe aan Firestore
       await setDoc(doc(db, 'users', uid), {
         email,
-        roles,
+        roles: selectedRoles,
         createdAt: new Date().toISOString(),
       })
 
       setMessage('✅ Gebruiker toegevoegd en mail verzonden!')
       setEmail('')
-      setRoles([])
+      setSelectedRoles([])
     } catch (err: any) {
       console.error('❌ Fout bij toevoegen:', err)
       setMessage('❌ Fout: ' + err.message)
@@ -77,11 +75,11 @@ export default function AdminPage() {
     }
   }
 
-  if (!checked || loading || userRole === null) {
+  if (!checked || loading) {
     return <p className="p-6 text-white">🔄 Bezig met laden...</p>
   }
 
-  if (userRole !== 'admin' && userRole !== 'co-admin') {
+  if (!roles.includes('admin') && !roles.includes('co-admin')) {
     return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
   }
 
@@ -110,7 +108,7 @@ export default function AdminPage() {
               <label key={role} className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  checked={roles.includes(role)}
+                  checked={selectedRoles.includes(role)}
                   onChange={() => toggleRole(role)}
                 />
                 {role}
