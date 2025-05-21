@@ -48,7 +48,7 @@ export default function ManageUsersPage() {
     }
 
     fetchUsers()
-  }, [checked, loading, userRole])
+  }, [checked, loading, userRoles])
 
   // Rollen aanpassen (checkbox toggle)
   const toggleRole = async (userId: string, role: string) => {
