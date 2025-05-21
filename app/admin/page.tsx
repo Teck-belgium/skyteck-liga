@@ -1,4 +1,11 @@
-// ... imports blijven hetzelfde
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { useAuth } from '@/context/AuthContext'
+import { useRequireVerifiedUser } from '@/lib/authCheck'
 
 export default function AdminPage() {
   const checked = useRequireVerifiedUser()
