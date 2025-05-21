@@ -34,7 +34,7 @@ export default function LogboekPage() {
       setUserId(user.uid)
 
       const fetchedRole = await getUserRole(user.uid)
-      setRole(fetchedRole)
+      setRoles(fetchedRole)
 
       const flightsRef = collection(db, 'flights')
       const q = query(flightsRef, orderBy('date', 'desc'))
