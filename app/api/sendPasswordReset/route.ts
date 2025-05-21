@@ -1,42 +1,38 @@
 import { NextResponse } from 'next/server'
-import { initializeApp, cert, getApps } from 'firebase-admin/app'
-import { getAuth } from 'firebase-admin/auth'
-import type { ServiceAccount } from 'firebase-admin'
-import serviceAccount from '../../../lib/firebaseAdmin/serviceAccountKey.json' assert { type: 'json' }
+import nodemailer from 'nodemailer'
 
-const serviceAccountTyped = serviceAccount as ServiceAccount
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+})
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccountTyped),
-  })
-}
-
-const auth = getAuth()
+const FROM_EMAIL = process.env.SMTP_USER
 
 export async function POST(req: Request) {
-  const { email } = await req.json()
-  if (!email) {
-    return NextResponse.json({ message: 'Email is verplicht' }, { status: 400 })
+  const { email, resetLink } = await req.json()
+
+  if (!email || !resetLink) {
+    return NextResponse.json({ message: 'Email en reset link zijn verplicht' }, { status: 400 })
   }
 
   try {
-    // Haal user op via email
-    const user = await auth.getUserByEmail(email)
-    const resetLink = await auth.generatePasswordResetLink(email, {
-      url: 'https://jouwdomein.be/login', // Pas aan naar jouw front-end login pagina
-      // eventueel extra instellingen
+    await transporter.sendMail({
+      from: FROM_EMAIL,
+      to: email,
+      subject: 'Stel je wachtwoord in',
+      html: `<p>Beste gebruiker,</p>
+             <p>Je kunt je wachtwoord instellen via deze link: <a href="${resetLink}">${resetLink}</a></p>
+             <p>Deze link is slechts eenmalig geldig.</p>`,
     })
 
-    // Stuur resetLink via mailservice of gebruik je eigen email provider
-    // Hier demo, log naar console:
-    console.log(`Stuur wachtwoord reset link naar ${email}: ${resetLink}`)
-
-    // TODO: hier echt mail versturen via SendGrid, nodemailer etc.
-
-    return NextResponse.json({ message: 'Reset link verstuurd' })
-  } catch (err: any) {
-    console.error('❌ Fout bij wachtwoord reset:', err)
-    return NextResponse.json({ message: err.message }, { status: 500 })
+    return NextResponse.json({ message: 'E-mail succesvol verzonden' })
+  } catch (error: any) {
+    console.error('Fout bij verzenden mail:', error)
+    return NextResponse.json({ message: error.message }, { status: 500 })
   }
 }
