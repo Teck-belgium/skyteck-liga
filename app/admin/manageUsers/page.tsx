@@ -23,7 +23,7 @@ export default function ManageUsersPage() {
   useEffect(() => {
     if (!checked || loading) return
 
-    if (!userRoles.includes('admin') && !userRoles.includes('co-admin')) {
+    if (!userRoles.includes('admin') && !userRoles.includes('co-admin') && !userRoles.includes('hoofd-admin')) {
   setError('⛔ Alleen admins mogen deze pagina zien.')
   return
 }
