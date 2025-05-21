@@ -94,7 +94,7 @@ export default function DashboardPage() {
         )}
 
         {/* Lid toevoegen (alleen voor admins) */}
-        {role === 'admin' && (
+        {roles === 'admin' && (
           <button
             onClick={() => router.push('/admin')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
