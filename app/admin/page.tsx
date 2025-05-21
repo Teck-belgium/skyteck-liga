@@ -19,6 +19,7 @@ export default function AdminPage() {
   const router = useRouter()
 
   const roleOptions = [
+    'hoofd-admin',
     'admin',
     'co-admin',
     'piloot',
