@@ -17,6 +17,12 @@ export default function AdminPage() {
 
   const router = useRouter()
 
+  // 🔍 DEBUG: console logs
+  console.log('✅ useRequireVerifiedUser check:', checked)
+  console.log('👤 Firebase user:', user)
+  console.log('🎭 Gebruikersrol:', userRole)
+  console.log('⏳ Loading status:', loading)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -97,7 +103,14 @@ export default function AdminPage() {
           Toevoegen aan Firestore
         </button>
       </form>
+
+      {/* 🔬 Optionele debug info zichtbaar in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs bg-gray-900 p-4 rounded mt-6 border border-gray-700">
+          <p className="font-bold mb-2">🧪 Debug Info:</p>
+          <pre>{JSON.stringify({ user, userRole, loading, checked }, null, 2)}</pre>
+        </div>
+      )}
     </div>
   )
 }
-
