@@ -3,6 +3,8 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import type { ServiceAccount } from 'firebase-admin'
 import serviceAccount from '../../../lib/firebaseAdmin/serviceAccountKey.json' assert { type: 'json' }
+import { sendPasswordResetMail } from '../../../lib/sendMail'
+
 
 const serviceAccountTyped = serviceAccount as ServiceAccount
 
@@ -37,7 +39,8 @@ export async function POST(req: Request) {
     // Genereer een wachtwoord-reset link en stuur die mee
     const resetLink = await auth.generatePasswordResetLink(email)
 
-    // TODO: verstuur de resetLink per mail naar de gebruiker (via een mailservice)
+    // verstuur de resetLink per mail naar de gebruiker (via een mailservice)
+    await sendPasswordResetMail(email, resetLink)
 
     return NextResponse.json({ uid: userRecord.uid, resetLink })
   } catch (err: any) {
