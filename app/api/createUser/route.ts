@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     })
 
     //  2. rollen instellen via custom claims
-    await auth.setCustomUsersClaims(userRecord.uid, { roles })
+    await auth.setCustomUserClaims(userRecord.uid, { roles })
 
    // 3. clubs + extra info opslaan in firestore
   await db.collection('users').doc(userRecord.uid).set({
