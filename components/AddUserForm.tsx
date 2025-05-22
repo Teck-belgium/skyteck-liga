@@ -3,17 +3,24 @@
 import { useState } from 'react'
 import { CLUBS } from '@/lib/clubs'
 
-const rolesList = ['lid', 'admin', 'instructeur'] // pas aan naar jouw rollen
+const rolesList = ['lid', 'admin', 'instructeur', 'hoofd-admin']
 
 export default function AddUserForm() {
   const [email, setEmail] = useState('')
   const [roles, setRoles] = useState<string[]>([])
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   function toggleRole(role: string) {
     setRoles(prev =>
       prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    )
+  }
+
+  function toggleClub(club: string) {
+    setSelectedClubs(prev =>
+      prev.includes(club) ? prev.filter(c => c !== club) : [...prev, club]
     )
   }
 
@@ -34,17 +41,24 @@ export default function AddUserForm() {
       return
     }
 
+    if (selectedClubs.length === 0) {
+      setMessage('Selecteer minstens één club.')
+      setLoading(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/createUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, roles }),
+        body: JSON.stringify({ email, roles, clubs: selectedClubs }),
       })
 
       if (res.ok) {
         setMessage('Gebruiker succesvol toegevoegd. Er is een mail verstuurd.')
         setEmail('')
         setRoles([])
+        setSelectedClubs([])
       } else {
         const data = await res.json()
         setMessage('Fout: ' + (data.message || 'Onbekende fout'))
@@ -79,16 +93,21 @@ export default function AddUserForm() {
             />
             {role}
           </label>
-      {CLUBS.map((Club) => (
-      <label key={Club}>
-      <input 
-        type="checkbox"
-        value={Club}
-        checked={selectedClubs.includes(club)}
-      onChange={handleCheckboxChange}
-        />
-        {Club}
-      </label>
+        ))}
+      </div>
+
+      <div>
+        <label>Clubs:</label>
+        {CLUBS.map(club => (
+          <label key={club} style={{ display: 'block' }}>
+            <input
+              type="checkbox"
+              value={club}
+              checked={selectedClubs.includes(club)}
+              onChange={() => toggleClub(club)}
+            />
+            {club}
+          </label>
         ))}
       </div>
 
