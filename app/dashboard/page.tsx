@@ -28,12 +28,13 @@ export default function DashboardPage() {
 
         if (userDoc.exists()) {
           const data = userDoc.data()
-          setRoles((data.roles?.join(', ') || null))// alle rollen tonen
+          setRoles(Array.isArray(data.roles) ? data.roles :(data.roles?.split(',') || []))
           setClubs(data.clubs || [])
         }
       } else {
         setUser(null)
-        setRoles("")
+        setRoles([])
+        setClubs([])
       }
     })
 
@@ -89,7 +90,7 @@ export default function DashboardPage() {
         </button>
 
         {/* Vluchten ingeven (admin + co-admin + hoofd-admin) */}
-        {['admin', 'co-admin', 'hoofd-admin'].includes(roles || '') && (
+        {hasAcces && (
           <button
             onClick={() => router.push('/vluchten')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
@@ -100,7 +101,7 @@ export default function DashboardPage() {
         )}
 
         {/* Lid toevoegen (alleen voor admins) */}
-        {['admin', 'co-admin', 'hoofd-admin'].includes(roles || '') && (
+        {hasAcces && (
           <button
             onClick={() => router.push('/admin/manageUsers')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
