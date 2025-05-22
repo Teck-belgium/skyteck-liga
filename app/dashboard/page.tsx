@@ -33,7 +33,7 @@ export default function DashboardPage() {
         }
       } else {
         setUser(null)
-        setRoles(null)
+        setRoles("")
       }
     })
 
