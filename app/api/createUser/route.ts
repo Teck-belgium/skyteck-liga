@@ -58,6 +58,6 @@ export async function POST(req: Request) {
   return NextResponse.json({ uid: userRecord.uid, resetLink })
 } catch (err:any) {
     console.error('❌ Fout bij createUser:', err)
-    return NextResponse.json({ message: err.message}, {status: 500 }
+    return NextResponse.json({ message: err.message}, {status: 500 })
   }
 }
