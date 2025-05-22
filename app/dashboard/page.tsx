@@ -94,7 +94,7 @@ export default function DashboardPage() {
         )}
 
         {/* Lid toevoegen (alleen voor admins) */}
-        {roles === 'admin' && (
+        {['admin', 'co-admin', 'hoofd-admin'].includes(roles || '') && (
           <button
             onClick={() => router.push('/admin/add-user')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
