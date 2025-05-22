@@ -83,7 +83,7 @@ export default function DashboardPage() {
         </button>
 
         {/* Vluchten ingeven (admin + co-admin) */}
-        {['admin', 'co-admin'].includes(roles || '') && (
+        {['admin', 'co-admin', 'hoofd-admin'].includes(roles || '') && (
           <button
             onClick={() => router.push('/vluchten')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
@@ -96,7 +96,7 @@ export default function DashboardPage() {
         {/* Lid toevoegen (alleen voor admins) */}
         {roles === 'admin' && (
           <button
-            onClick={() => router.push('/admin')}
+            onClick={() => router.push('admin', 'hoofd-admin)}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
           >
             <UserPlus className="h-6 w-6 mb-1 text-blue-600" />
