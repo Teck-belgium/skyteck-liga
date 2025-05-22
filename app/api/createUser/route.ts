@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from (firebase-admin/firestore'
 import type { ServiceAccount } from 'firebase-admin'
 import serviceAccount from '../../../lib/firebaseAdmin/serviceAccountKey.json' assert { type: 'json' }
 import { sendPasswordResetMail } from '../../../lib/sendMail'
-
 
 const serviceAccountTyped = serviceAccount as ServiceAccount
 
@@ -15,36 +15,49 @@ if (!getApps().length) {
 }
 
 const auth = getAuth()
+const db = getFirestore()
 
 export async function POST(req: Request) {
-  const { email, roles } = await req.json()
+  const { email, roles, clubs } = await req.json()
 
   if (!email) {
     return NextResponse.json({ message: 'Email is verplicht' }, { status: 400 })
   }
 
+  if (!roles) {
+    return NextResponse.json({ message: 'Minstens één rol is vereist'}, {status: 400})
+  }
+
+  if (!clubs) {
+    return NextResponse.jsnon({ message: 'Minstens één club is vereist'}, {status: 400})
+  }
+
   try {
-    // Maak de gebruiker aan zonder wachtwoord
+    // 1. gebruiker aanmaken
     const userRecord = await auth.createUser({
       email,
       emailVerified: false,
       disabled: false,
     })
 
-    // Stel aangepaste claims in voor rollen
-    if (roles && Array.isArray(roles)) {
-      await auth.setCustomUserClaims(userRecord.uid, { roles })
-    }
+    //  2. rollen instellen via custom claims
+    await auth.setCustomUsersClaims(userRecord.uid, { roles })
 
-    // Genereer een wachtwoord-reset link en stuur die mee
-    const resetLink = await auth.generatePasswordResetLink(email)
+   // 3. clubs + extra info opslaan in firestore
+  await db.collection('users').doc(userRecord.uid).set({
+    email,
+    roles,
+    clubs,
+    createAt: new Date(),
+  })
 
-    // verstuur de resetLink per mail naar de gebruiker (via een mailservice)
-    await sendPasswordResetMail(email, resetLink)
+  //4. verzend reset-link via mail
+  const resetLink = await auth.generatePasswordResetLink(email)
+  await sendPasswordResetMail(email, resetLink)
 
-    return NextResponse.json({ uid: userRecord.uid, resetLink })
-  } catch (err: any) {
+  return NextResponse.json({ uid: userRecord.uid, resetLink })
+} catch (err:any) {
     console.error('❌ Fout bij createUser:', err)
-    return NextResponse.json({ message: err.message }, { status: 500 })
+    return NextResponse.json({ message: err.message, {status: 500 }
   }
 }
