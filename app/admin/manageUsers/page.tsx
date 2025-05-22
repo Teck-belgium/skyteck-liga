@@ -90,7 +90,7 @@ export default function ManageUsersPage() {
         onClick={() => router.push('/admin')}
         className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-        Ga naar nieuwe pagina
+        Lid toevoegen
       </button>
       {loadingUsers ? (
         <p>🔄 Gebruikers laden...</p>
