@@ -12,7 +12,8 @@ import { useRequireVerifiedUser } from '@/lib/authCheck'
 export default function DashboardPage() {
   useRequireVerifiedUser()
   const [user, setUser] = useState<User | null>(null)
-  const [roles, setRoles] = useState<string | null>(null)
+  const [roles, setRoles] = useState<string>('') // geen nul meer nodig
+  const [clubs, setClubs] = useState<string[]>([])
   const [startsThisYear, setStartsThisYear] = useState<number>(0)
   const router = useRouter()
 
@@ -27,7 +28,8 @@ export default function DashboardPage() {
 
         if (userDoc.exists()) {
           const data = userDoc.data()
-          setRoles(data.role || null)
+          setRoles((data.roles?.join(', ') || null)// alle rollen tonen
+          setClubs(data.clubs || [])
         }
       } else {
         setUser(null)
@@ -71,6 +73,10 @@ export default function DashboardPage() {
       {user && <p>Ingelogd als: <strong>{user.email}</strong></p>}
       {roles && <p>Rol: <strong>{roles}</strong></p>}
       {roles && <p>Starts dit jaar: <strong>{startsThisYear}</strong></p>}
+      {clubs.length > 0 && (
+      <p>Clubs: <strong>{clubs.join(', ')}</strong></p>
+      )}
+
 
       <div className="flex gap-4 mt-6 flex-wrap">
         {/* Logboek (voor iedereen) */}
