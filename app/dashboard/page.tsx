@@ -77,7 +77,7 @@ export default function DashboardPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Welkom op je Dashboard</h1>
       {user && <p>Ingelogd als: <strong>{user.email}</strong></p>}
-      {roles && <p>Rol: <strong>{roles}</strong></p>}
+      {roles && <p>Rol: <strong>{Array.isArray(roles) ? roles.join(', ') : roles}</strong></p>}
       {roles && <p>Starts dit jaar: <strong>{startsThisYear}</strong></p>}
       {clubs.length > 0 && (
       <p>Clubs: <strong>{clubs.join(', ')}</strong></p>
