@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { CLUBS } from '@/lib/clubs'
 
 const rolesList = ['lid', 'admin', 'instructeur'] // pas aan naar jouw rollen
 
@@ -78,6 +79,16 @@ export default function AddUserForm() {
             />
             {role}
           </label>
+      {CLUBS.map((Club) => (
+      <label key={Club}>
+      <input 
+        type="checkbox"
+        value={Club}
+        checked={selectedClubs.includes(club)}
+      onChange={handleCheckboxChange}
+        />
+        {Club}
+      </label>
         ))}
       </div>
 
