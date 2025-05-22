@@ -95,7 +95,7 @@ export default function DashboardPage() {
         </button>
 
         {/* Vluchten ingeven (admin + co-admin + hoofd-admin) */}
-        {hasAccesss && (
+        {hasAccess && (
           <button
             onClick={() => router.push('/vluchten')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
