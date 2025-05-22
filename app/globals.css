@@ -3,10 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'Courier New', monospace;
+  --background: #001F3F;       /* Donkerblauw */
+  --foreground: #FFFFFF;       /* Wit */
+  --accent: #3C8DBC;           /* Zachtblauw */
+  --muted: #F5F5F5;            /* Lichtgrijs */
+  --border: #DDDDDD;           /* Zilvergrijs */
+  --success: #2ECC71;          /* Groen */
+  --error: #E74C3C;            /* Rood */
+  --text-dark: #111111;
+  --text-light: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
