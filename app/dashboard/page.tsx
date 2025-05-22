@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
         if (userDoc.exists()) {
           const data = userDoc.data()
-          setRoles((data.roles?.join(', ') || null)// alle rollen tonen
+          setRoles((data.roles?.join(', ') || null))// alle rollen tonen
           setClubs(data.clubs || [])
         }
       } else {
