@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { CLUBS } from '@/lib/clubs'
+import { useEffect, useState } from 'react'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '@/lib/firebase' // dit is jouw client-side firestore config
 
 const rolesList = ['lid', 'admin', 'instructeur', 'hoofd-admin']
 
@@ -9,9 +10,25 @@ export default function AddUserForm() {
   const [email, setEmail] = useState('')
   const [roles, setRoles] = useState<string[]>([])
   const [selectedClubs, setSelectedClubs] = useState<string[]>([])
+  const [clubs, setClubs] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    async function fetchClubs(){
+      try {
+        const snapshot = await getDocs(collection(db, 'clubs'))
+        const names = snapshot.docs.map(doc => doc.data().name as string)
+        setClubs(names)
+      } catch (error) {
+        console.error('Fout bij het ophalen clubs:', error)
+        setMessage('Fout bij ophalen van clubs.')
+      }
+    }
+
+    fetchClubs()
+  }, [])
+  
   function toggleRole(role: string) {
     setRoles(prev =>
       prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
