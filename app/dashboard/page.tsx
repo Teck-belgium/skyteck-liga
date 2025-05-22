@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
   // Bepaal toegang op basis van rollen
   const hasAccess = roles.some(role =>
-    ['admin', 'hoofd-admin', (co)admin'].includes(role)
+    ['admin', 'hoofd-admin', '(co)admin'].includes(role)
     )
 
   // 🔓 Uitloggen
