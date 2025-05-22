@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookText, UserPlus, PencilLine } from 'lucide-react'
+import { BookText, UserPlus, PencilLine, Calendar } from 'lucide-react'
 import { User, onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
@@ -85,6 +85,14 @@ export default function DashboardPage() {
 
 
       <div className="flex gap-4 mt-6 flex-wrap">
+        {/* vliegdagen (voor iedereen) */}
+        <button
+          onClick={() => router.push('/kalender')}
+          className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transistion w-32"
+            < Calendar className="w-5 h-5"/>
+          Kalender
+        </button>
+        
         {/* Logboek (voor iedereen) */}
         <button
           onClick={() => router.push('/logboek')}
