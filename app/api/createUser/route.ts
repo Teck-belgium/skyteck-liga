@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   }
 
   if (!clubs) {
-    return NextResponse.jsnon({ message: 'Minstens één club is vereist'}, {status: 400})
+    return NextResponse.json({ message: 'Minstens één club is vereist'}, {status: 400})
   }
 
   try {
