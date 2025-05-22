@@ -87,7 +87,7 @@ export default function ManageUsersPage() {
     <div className="p-6 max-w-5xl mx-auto text-white">
       <h1 className="text-2xl font-bold mb-6">👥 Beheer leden</h1>
       <button
-        onclick={() => router.push('/admin')}
+        onClick={() => router.push('/admin')}
         className="bg-blue-500 text-white px-4 py-2 rounded"
         >
         Ga naar nieuwe pagina
