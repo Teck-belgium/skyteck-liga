@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar } from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
-import VliegdagForm from '@/app/kalendeer/VliegdagForm'  // pas pad aan indien nodig
+import VliegdagForm from '@/app/kalender/VliegdagForm'  // pas pad aan indien nodig
 import { getUserClubs } from '@/lib/api'   // functie om clubs uit Firestore te halen
 import { auth } from '@/lib/firebase'
 
