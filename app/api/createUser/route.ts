@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import { getFirestore } from firebase-admin/firestore'
+import { getFirestore } from 'firebase-admin/firestore'
 import type { ServiceAccount } from 'firebase-admin'
 import serviceAccount from '../../../lib/firebaseAdmin/serviceAccountKey.json' assert { type: 'json' }
 import { sendPasswordResetMail } from '../../../lib/sendMail'
