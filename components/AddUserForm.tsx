@@ -115,7 +115,7 @@ export default function AddUserForm() {
 
       <div>
         <label>Clubs:</label>
-        {CLUBS.map(club => (
+        {clubs.map(club => (
           <label key={club} style={{ display: 'block' }}>
             <input
               type="checkbox"
