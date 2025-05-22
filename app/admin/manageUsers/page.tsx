@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase'
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
+import { useRouter } from 'next/navigation'
 
 type UserData = {
   id: string
@@ -15,7 +16,7 @@ type UserData = {
 export default function ManageUsersPage() {
   const checked = useRequireVerifiedUser()
   const { roles: userRoles, loading } = useAuth()
-
+  const router = useRouter()
   const [users, setUsers] = useState<UserData[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +86,12 @@ export default function ManageUsersPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto text-white">
       <h1 className="text-2xl font-bold mb-6">👥 Beheer leden</h1>
+      <button
+        onclick={() => router.push('/admin')}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+        Ga naar nieuwe pagina
+      </button>
       {loadingUsers ? (
         <p>🔄 Gebruikers laden...</p>
       ) : (
