@@ -1,13 +1,12 @@
-/* globals.css */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Eigen CSS-variabelen voor lichte en donkere modus */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Courier New', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,11 +16,6 @@
   }
 }
 
-/* Body styling met variabelen */
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
+  @apply bg-background text-foreground font-sans;
 }
