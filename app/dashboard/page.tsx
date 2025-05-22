@@ -62,6 +62,11 @@ export default function DashboardPage() {
     fetchStarts()
   }, [user])
 
+  // Bepaal toegang op basis van rollen
+  const hasAccess = roles.some(role =>
+    ['admin', 'hoofd-admin', (co)admin'].includes(role)
+    )
+
   // 🔓 Uitloggen
   const handleLogout = async () => {
     await signOut(auth)
@@ -90,7 +95,7 @@ export default function DashboardPage() {
         </button>
 
         {/* Vluchten ingeven (admin + co-admin + hoofd-admin) */}
-        {hasAcces && (
+        {hasAccesss && (
           <button
             onClick={() => router.push('/vluchten')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
@@ -101,7 +106,7 @@ export default function DashboardPage() {
         )}
 
         {/* Lid toevoegen (alleen voor admins) */}
-        {hasAcces && (
+        {hasAccess && (
           <button
             onClick={() => router.push('/admin/manageUsers')}
             className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
