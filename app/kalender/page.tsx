@@ -1,34 +1,32 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
-import { db, auth } from '@/lib/firebase'
-import { collection, getDocs, addDoc, query, where, doc, getDoc } from 'firebase/firestore'
+import { useRequireVerifiedUser } from '@/lib/authCheck'
+import { getDocs, collection, query, where } from 'firebase/firestore'
+import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 
 export default function KalenderPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [clubs, setClubs] = useState<string[]>([])
-  const [selectedClub, setSelectedClub] = useState('')
-  const [startTime, setStartTime] = useState('')
-  const [endTime, setEndTime] = useState('')
-  const [userId, setUserId] = useState<string | null>(null)
-  const [message, setMessage] = useState('')
+  useRequireVerifiedUser()
 
+  const [userId, setUserId] = useState<string | null>(null)
+  const [clubs, setClubs] = useState<string[]>([])
+  const [selectedClub, setSelectedClub] = useState<string | null>(null)
+
+  // ✅ Ophalen van huidige gebruiker
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid)
 
-        const userRef = doc(db, 'users', user.uid)
-        const userSnap = await getDoc(userRef)
+        const usersRef = collection(db, 'users')
+        const q = query(usersRef, where('__name__', '==', user.uid))
+        const snapshot = await getDocs(q)
 
-        if (userSnap.exists()) {
-          const data = userSnap.data()
-          if (data.clubs) {
-            setClubs(data.clubs)
-          }
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data()
+          const userClubs = data.clubs || []
+          setClubs(userClubs)
         }
       }
     })
@@ -36,79 +34,50 @@ export default function KalenderPage() {
     return () => unsubscribe()
   }, [])
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
-    if (!selectedDate || !selectedClub || !startTime || !endTime || !userId) {
-      setMessage('Vul alle velden in.')
-      return
+  // ✅ Automatisch club selecteren als er maar 1 is
+  useEffect(() => {
+    if (clubs.length === 1) {
+      setSelectedClub(clubs[0])
     }
-
-    try {
-      await addDoc(collection(db, 'aanwezigheden'), {
-        userId,
-        date: selectedDate.toISOString(),
-        club: selectedClub,
-        start: startTime,
-        end: endTime,
-      })
-      setMessage('Inschrijving opgeslagen ✅')
-      setSelectedClub('')
-      setStartTime('')
-      setEndTime('')
-    } catch (err) {
-      console.error(err)
-      setMessage('Fout bij opslaan 😥')
-    }
-  }
+  }, [clubs])
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Kalender</h1>
 
-      <Calendar onClickDay={setSelectedDate} />
+      {/* 📅 Als gebruiker 1 club heeft */}
+      {clubs.length === 1 && (
+        <div>
+          <p>Club: <strong>{clubs[0]}</strong></p>
+          <input type="hidden" value={clubs[0]} />
+        </div>
+      )}
 
-      {selectedDate && (
-        <div className="mt-6">
-          <p>Geselecteerde dag: <strong>{selectedDate.toDateString()}</strong></p>
+      {/* 📅 Als gebruiker meerdere clubs heeft */}
+      {clubs.length > 1 && (
+        <div className="mb-4">
+          <label className="block mb-1">Kies je club:</label>
+          <select
+            value={selectedClub || ''}
+            onChange={(e) => setSelectedClub(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option value="">-- Selecteer club --</option>
+            {clubs.map((club) => (
+              <option key={club} value={club}>{club}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-            {clubs.length > 1 && (
-              <div>
-                <label>Kies club:</label>
-                <select value={selectedClub} onChange={e => setSelectedClub(e.target.value)} required>
-                  <option value="">-- Selecteer --</option>
-                  {clubs.map(club => (
-                    <option key={club} value={club}>{club}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {clubs.length === 1 && (
-              <div>
-                <p>Club: <strong>{clubs[0]}</strong></p>
-                <input type="hidden" value={clubs[0]} />
-                {setSelectedClub(clubs[0])}
-              </div>
-            )}
-
-            <div>
-              <label>Startuur:</label>
-              <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} required />
-            </div>
-
-            <div>
-              <label>Einduur:</label>
-              <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} required />
-            </div>
-
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Opslaan</button>
-
-            {message && <p className="mt-2">{message}</p>}
-          </form>
+      {/* 📌 Ingevulde selectie */}
+      {selectedClub && (
+        <div className="mt-4">
+          <p>Geselecteerde club: <strong>{selectedClub}</strong></p>
+          {/* Hier kun je de kalendercomponent tonen of invoervelden */}
         </div>
       )}
     </div>
   )
 }
+
