@@ -122,7 +122,7 @@ export default function AdminPage() {
             disabled={isSubmitting}
             className="bg-blue-600 text-white px-4 py-2 rounded w-full"
           >
-            {isSubmitting ? 'Bezig...' : 'Toevoegen aan Firebase'}
+            {isSubmitting ? 'Bezig...' : 'Lid toevoegen'}
           </button>
         </div>
       </form>
