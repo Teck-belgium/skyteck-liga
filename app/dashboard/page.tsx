@@ -89,6 +89,7 @@ export default function DashboardPage() {
         <button
           onClick={() => router.push('/kalender')}
           className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transistion w-32"
+          >
             < Calendar className="w-5 h-5"/>
           Kalender
         </button>
