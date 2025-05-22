@@ -1,13 +1,12 @@
-// app/layout.tsx
 import './globals.css'
 import { Inter } from 'next/font/google'
 import DashboardLink from '@/components/DashboardLink'
-import { AuthProvider } from '@/context/AuthContext' // ✅ import toevoegen
+import { AuthProvider } from '@/context/AuthContext'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata = {
-  title: 'SkyTeck Liga Test',
+  title: 'SkyTeck Liga',
   description: 'Luchtvaartapp voor clubs en piloten',
 }
 
@@ -17,14 +16,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="nl">
-      <body className={inter.className}>
-        <AuthProvider> {/* ✅ Context toevoegen */}
+    <html lang="nl" className={inter.variable}>
+      <body>
+        <AuthProvider>
           <div className="min-h-screen relative">
-            {/* Dashboard-link rechtsboven (alleen zichtbaar als ingelogd en NIET op dashboard) */}
             <DashboardLink />
-
-            {/* Pagina-inhoud */}
             <main className="pt-16 px-4">
               {children}
             </main>
@@ -34,4 +30,3 @@ export default function RootLayout({
     </html>
   )
 }
-
