@@ -13,7 +13,7 @@ export default function KalenderPage() {
 
       {/* 📅 Kalender */}
       <Calendar
-        onClickDay={(date) => setSelectedDate(date)}
+        onClickDay={(date: Date) => setSelectedDate(date)}
         value={selectedDate}
       />
 
