@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
@@ -13,6 +13,8 @@ export default function AdminPage() {
 
   const [email, setEmail] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [clubs, setClubs] = useState<{ id: string; name: string }[]>([])
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -35,6 +37,27 @@ export default function AdminPage() {
       setSelectedRoles([...selectedRoles, role])
     }
   }
+
+    const toggleClub = (clubId: string) => {
+    if (selectedClubs.includes(clubId)) {
+      setSelectedClubs(selectedClubs.filter((id) => id !== clubId))
+    } else {
+      setSelectedClubs([...selectedClubs, clubId])
+    }
+  }
+  
+useEffect(() => {
+  const fetchClubs = async () => {
+    const snapshot = await getDocs(collection(db, 'clubs'))
+    const clubList = snapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name
+    }))
+    setClubs(clubList)
+  }
+
+  fetchClubs()
+}, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,12 +85,14 @@ export default function AdminPage() {
       await setDoc(doc(db, 'users', uid), {
         email,
         roles: selectedRoles,
+        clubs: selectedClubs,
         createdAt: new Date().toISOString(),
       })
 
       setMessage('✅ Gebruiker toegevoegd en mail verzonden!')
       setEmail('')
       setSelectedRoles([])
+      setSelectedClubs([])
     } catch (err: any) {
       console.error('❌ Fout bij toevoegen:', err)
       setMessage('❌ Fout: ' + err.message)
@@ -113,6 +138,20 @@ export default function AdminPage() {
                   onChange={() => toggleRole(role)}
                 />
                 {role}
+              </label>
+            ))}
+          </div>
+
+          <p className="font-medium pt-4">🏷️ Clubs</p>
+          <div className="flex flex-wrap gap-4">
+            {clubs.map((club) => (
+              <label key={club.id} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={selectedClubs.includes(club.id)}
+                  onChange={() => toggleClub(club.id)}
+                />
+                {club.name}
               </label>
             ))}
           </div>
