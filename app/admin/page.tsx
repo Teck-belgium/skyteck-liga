@@ -166,7 +166,7 @@ useEffect(() => {
                   checked={selectedClubs.includes(club)}
                   onChange={() => toggleClub(club)}
                 />
-                {club.name}
+                {club}
               </label>
             ))}
           </div>
