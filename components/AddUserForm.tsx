@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase' // dit is jouw client-side firestore config
 const rolesList = ['lid', 'admin', 'instructeur', 'hoofd-admin']
 
 export default function AddUserForm() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [roles, setRoles] = useState<string[]>([])
   const [selectedClubs, setSelectedClubs] = useState<string[]>([])
@@ -46,6 +47,12 @@ export default function AddUserForm() {
     setLoading(true)
     setMessage('')
 
+    if (!name.trim()) {
+      setMessage('Naam is verplicht.')
+      setLoading(false)
+      return
+    }
+    
     if (!email) {
       setMessage('Email is verplicht.')
       setLoading(false)
@@ -68,11 +75,13 @@ export default function AddUserForm() {
       const res = await fetch('/api/createUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, roles, clubs: selectedClubs }),
+        body: JSON.stringify({ name, email, roles, clubs: selectedClubs }),
       })
 
       if (res.ok) {
         setMessage('Gebruiker succesvol toegevoegd. Er is een mail verstuurd.')
+        
+        setName('')
         setEmail('')
         setRoles([])
         setSelectedClubs([])
@@ -89,6 +98,16 @@ export default function AddUserForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <div>
+        <label>Naam:</label>
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+        />
+      </div>
+      
       <div>
         <label>Email:</label>
         <input
