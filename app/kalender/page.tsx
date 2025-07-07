@@ -40,7 +40,7 @@ export default function KalenderPage() {
       <h1 className="text-2xl font-bold mb-4">Kalender</h1>
 
       <Calendar
-        onClickDay={(date) => setSelectedDate(date)}
+        onClickDay={(date: Date) => setSelectedDate(date)}
         value={selectedDate || new Date()}
       />
 
