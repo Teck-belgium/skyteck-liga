@@ -160,11 +160,11 @@ useEffect(() => {
           <p className="font-medium pt-4">🏷️ Clubs</p>
           <div className="flex flex-wrap gap-4">
             {clubOptions.map((club) => (
-              <label key={club.id} className="flex items-center gap-1">
+              <label key={club.} className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  checked={selectedClubs.includes(club.id)}
-                  onChange={() => toggleClub(club.id)}
+                  checked={selectedClubs.includes(club)}
+                  onChange={() => toggleClub(club)}
                 />
                 {club.name}
               </label>
