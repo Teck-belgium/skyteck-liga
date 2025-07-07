@@ -31,18 +31,18 @@ export default function AdminPage() {
   ]
 
   const clubOptions = [
-    'ACK'
-    'AZC'
-    'BZC'
-    'DAC'
-    'KAC'
-    'KAZM'
-    'KVDM'
-    'LUAC'
-    'LZC'
-    'LVZ'
-    'VZA'
-    'VZP'
+    'ACK',
+    'AZC',
+    'BZC',
+    'DAC',
+    'KAC',
+    'KAZM',
+    'KVDM',
+    'LUAC',
+    'LZC',
+    'LVZ',
+    'VZA',
+    'VZP',
   ]
 
   const toggleRole = (role: string) => {
