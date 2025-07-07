@@ -30,6 +30,21 @@ export default function AdminPage() {
     'Sleeppiloot',
   ]
 
+  const clubOptions = [
+    'ACK'
+    'AZC'
+    'BZC'
+    'DAC'
+    'KAC'
+    'KAZM'
+    'KVDM'
+    'LUAC'
+    'LZC'
+    'LVZ'
+    'VZA'
+    'VZP'
+  ]
+
   const toggleRole = (role: string) => {
     if (selectedRoles.includes(role)) {
       setSelectedRoles(selectedRoles.filter((r) => r !== role))
@@ -144,7 +159,7 @@ useEffect(() => {
 
           <p className="font-medium pt-4">🏷️ Clubs</p>
           <div className="flex flex-wrap gap-4">
-            {clubs.map((club) => (
+            {clubOptions.map((club) => (
               <label key={club.id} className="flex items-center gap-1">
                 <input
                   type="checkbox"
