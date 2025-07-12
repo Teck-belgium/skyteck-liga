@@ -34,7 +34,7 @@ export default function ManageUsersPage() {
     if (!checked || loading) return
 
     if (!userRoles.includes('admin') && !userRoles.includes('co-admin') && !userRoles.includes('hoofd-admin')) {
-  setError('⛔ Alleen admins mogen deze pagina zien.')
+  setError('⛔ Alleen admins mogen deze pagina zien.1')
   return
 }
 
