@@ -12,8 +12,11 @@ export default function AdminPage() {
   const { user, roles, loading } = useAuth()
 
   useEffect(() => {
-  console.log('Ingelogde rollen:', roles)
-}, [roles])
+    console.log('✅ Checked:', checked)
+    console.log('✅ Loading:', loading)
+    console.log('✅ Rollen:', roles)
+    console.log('✅ Gebruiker:', user)
+  }, [checked, loading, roles, user])
 
   const [email, setEmail] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
@@ -34,21 +37,6 @@ export default function AdminPage() {
     'Sleeppiloot',
   ]
 
-  const clubOptions = [
-    'ACK',
-    'AZC',
-    'BZC',
-    'DAC',
-    'KAC',
-    'KAZM',
-    'KVDM',
-    'LUAC',
-    'LZC',
-    'LVZ',
-    'VZA',
-    'VZP',
-  ]
-
   const toggleRole = (role: string) => {
     if (selectedRoles.includes(role)) {
       setSelectedRoles(selectedRoles.filter((r) => r !== role))
@@ -57,26 +45,26 @@ export default function AdminPage() {
     }
   }
 
-    const toggleClub = (clubId: string) => {
+  const toggleClub = (clubId: string) => {
     if (selectedClubs.includes(clubId)) {
       setSelectedClubs(selectedClubs.filter((id) => id !== clubId))
     } else {
       setSelectedClubs([...selectedClubs, clubId])
     }
   }
-  
-useEffect(() => {
-  const fetchClubs = async () => {
-    const snapshot = await getDocs(collection(db, 'clubs'))
-    const clubList = snapshot.docs.map(doc => ({
-      id: doc.id,
-      name: doc.data().name
-    }))
-    setClubs(clubList)
-  }
 
-  fetchClubs()
-}, [])
+  useEffect(() => {
+    const fetchClubs = async () => {
+      const snapshot = await getDocs(collection(db, 'clubs'))
+      const clubList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name
+      }))
+      setClubs(clubList)
+    }
+
+    fetchClubs()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,7 +112,8 @@ useEffect(() => {
     return <p className="p-6 text-white">🔄 Bezig met laden...</p>
   }
 
-  if (!roles.includes('admin') && !roles.includes('co-admin') && !roles.includes('hoofd-admin')) {
+  // ✅ VEILIGE CONTROLE OP ROLLEN
+  if (!Array.isArray(roles) || !roles.some((r) => ['admin', 'co-admin', 'hoofd-admin'].includes(r))) {
     return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
   }
 
@@ -162,19 +151,18 @@ useEffect(() => {
           </div>
 
           <p className="font-medium pt-4">🏷️ Clubs</p>
-<div className="flex flex-wrap gap-4">
-  {clubs.map((club) => (
-    <label key={club.id} className="flex items-center gap-1">
-      <input
-        type="checkbox"
-        checked={selectedClubs.includes(club.id)}
-        onChange={() => toggleClub(club.id)}
-      />
-      {club.name}
-    </label>
-  ))}
-</div>
-
+          <div className="flex flex-wrap gap-4">
+            {clubs.map((club) => (
+              <label key={club.id} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={selectedClubs.includes(club.id)}
+                  onChange={() => toggleClub(club.id)}
+                />
+                {club.name}
+              </label>
+            ))}
+          </div>
 
           <button
             type="submit"
