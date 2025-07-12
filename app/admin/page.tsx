@@ -7,6 +7,19 @@ import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
 
+useEffect(() => {
+  console.log('🧪 [DEBUG] checked:', checked)
+  console.log('🧪 [DEBUG] loading:', loading)
+  console.log('🧪 [DEBUG] user:', user)
+  console.log('🧪 [DEBUG] roles:', roles)
+  console.log('🧪 [DEBUG] roles isArray:', Array.isArray(roles))
+  console.log(
+    '🧪 [DEBUG] toegang toegestaan:',
+    Array.isArray(roles) &&
+      roles.some((r) => ['admin', 'co-admin', 'hoofd-admin'].includes(r))
+  )
+}, [checked, loading, user, roles])
+
 export default function AdminPage() {
   const checked = useRequireVerifiedUser()
   const { user, roles, loading } = useAuth()
