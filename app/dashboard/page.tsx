@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
   // Bepaal toegang op basis van rollen
   const hasAccess = roles.some(role =>
-    ['admin', 'hoofd-admin', '(co)admin'].includes(role)
+    ['admin', 'hoofd-admin', 'co-admin'].includes(role)
     )
 
   // 🔓 Uitloggen
@@ -88,7 +88,7 @@ export default function DashboardPage() {
         {/* vliegdagen (voor iedereen) */}
         <button
           onClick={() => router.push('/kalender')}
-          className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transistion w-32"
+          className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
           >
             < Calendar className="w-5 h-5"/>
           Kalender
