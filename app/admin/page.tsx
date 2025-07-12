@@ -12,19 +12,6 @@ export default function AdminPage() {
   const { user, roles, loading } = useAuth()
 
   useEffect(() => {
-  console.log('🧪 [DEBUG] checked:', checked)
-  console.log('🧪 [DEBUG] loading:', loading)
-  console.log('🧪 [DEBUG] user:', user)
-  console.log('🧪 [DEBUG] roles:', roles)
-  console.log('🧪 [DEBUG] roles isArray:', Array.isArray(roles))
-  console.log(
-    '🧪 [DEBUG] toegang toegestaan:',
-    Array.isArray(roles) &&
-      roles.some((r) => ['admin', 'co-admin', 'hoofd-admin'].includes(r))
-  )
-}, [checked, loading, user, roles])
-
-  useEffect(() => {
     console.log('✅ Checked:', checked)
     console.log('✅ Loading:', loading)
     console.log('✅ Rollen:', roles)
