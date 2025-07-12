@@ -11,6 +11,10 @@ export default function AdminPage() {
   const checked = useRequireVerifiedUser()
   const { user, roles, loading } = useAuth()
 
+  useEffect(() => {
+  console.log('Ingelogde rollen:', roles)
+}, [roles])
+
   const [email, setEmail] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([])
