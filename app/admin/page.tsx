@@ -114,7 +114,7 @@ export default function AdminPage() {
 
   // ✅ VEILIGE CONTROLE OP ROLLEN
   if (!Array.isArray(roles) || !roles.some((r) => ['admin', 'co-admin', 'hoofd-admin'].includes(r))) {
-    return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.</p>
+    return <p className="p-6 text-red-500">⛔ Alleen admins mogen deze pagina zien.5</p>
   }
 
   return (
