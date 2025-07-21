@@ -28,8 +28,17 @@ export default function DashboardPage() {
 
         if (userDoc.exists()) {
           const data = userDoc.data()
-          setRoles(Array.isArray(data.roles) ? data.roles :(data.roles?.split(',') || []))
-          setClubs(data.clubs || [])
+          const rolesData = data.roles
+
+          const safeRoles = Array.isArray(rolesData)
+            ? rolesData
+            : typeof rolesData === 'string'
+              ? rolesData.split(',').map(r => r.trim())
+              : []
+
+          setRoles(safeRoles)
+          setClubs(Array.isArray(data.clubs) ? data.clubs : [])
+          console.log('✅ Gebruikersrollen:', safeRoles)
         }
       } else {
         setUser(null)
@@ -65,7 +74,7 @@ export default function DashboardPage() {
   // Bepaal toegang op basis van rollen
   const hasAccess = roles.some(role =>
     ['admin', 'hoofd-admin', 'co-admin'].includes(role)
-    )
+  )
 
   // 🔓 Uitloggen
   const handleLogout = async () => {
@@ -77,24 +86,19 @@ export default function DashboardPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Welkom op je Dashboard</h1>
       {user && <p>Ingelogd als: <strong>{user.email}</strong></p>}
-      {roles && <p>Rol: <strong>{Array.isArray(roles) ? roles.join(', ') : roles}</strong></p>}
-      {roles && <p>Starts dit jaar: <strong>{startsThisYear}</strong></p>}
-      {clubs.length > 0 && (
-      <p>Clubs: <strong>{clubs.join(', ')}</strong></p>
-      )}
-
+      <p>Rol: <strong>{roles.length > 0 ? roles.join(', ') : 'Geen rollen gevonden'}</strong></p>
+      <p>Starts dit jaar: <strong>{startsThisYear}</strong></p>
+      {clubs.length > 0 && <p>Clubs: <strong>{clubs.join(', ')}</strong></p>}
 
       <div className="flex gap-4 mt-6 flex-wrap">
-        {/* vliegdagen (voor iedereen) */}
         <button
           onClick={() => router.push('/kalender')}
           className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
-          >
-            < Calendar className="w-5 h-5"/>
+        >
+          <Calendar className="w-5 h-5" />
           Kalender
         </button>
-        
-        {/* Logboek (voor iedereen) */}
+
         <button
           onClick={() => router.push('/logboek')}
           className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
@@ -103,26 +107,24 @@ export default function DashboardPage() {
           <span className="text-sm">Logboek</span>
         </button>
 
-        {/* Vluchten ingeven (admin + co-admin + hoofd-admin) */}
         {hasAccess && (
-          <button
-            onClick={() => router.push('/vluchten')}
-            className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
-          >
-            <PencilLine className="h-6 w-6 mb-1 text-green-600" />
-            <span className="text-sm text-center">Vluchten ingeven</span>
-          </button>
-        )}
+          <>
+            <button
+              onClick={() => router.push('/vluchten')}
+              className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
+            >
+              <PencilLine className="h-6 w-6 mb-1 text-green-600" />
+              <span className="text-sm text-center">Vluchten ingeven</span>
+            </button>
 
-        {/* Lid toevoegen (alleen voor admins) */}
-        {hasAccess && (
-          <button
-            onClick={() => router.push('/admin/manageUsers')}
-            className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
-          >
-            <UserPlus className="h-6 w-6 mb-1 text-blue-600" />
-            <span className="text-sm">Leden</span>
-          </button>
+            <button
+              onClick={() => router.push('/admin/manageUsers')}
+              className="p-4 border rounded flex flex-col items-center justify-center hover:bg-gray-100 transition w-32"
+            >
+              <UserPlus className="h-6 w-6 mb-1 text-blue-600" />
+              <span className="text-sm">Leden</span>
+            </button>
+          </>
         )}
       </div>
 
