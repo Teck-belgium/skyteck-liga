@@ -38,10 +38,10 @@ export default function ManageUsersPage() {
 
     if (!checked || loading) return
 
-    if (!userRoles.includes('admin') && !userRoles.includes('co-admin') && !userRoles.includes('hoofd-admin')) {
-      setError('⛔ Alleen admins mogen deze pagina zien.1')
-      return
-    }
+    if (!Array.isArray(userRoles) || !userRoles.some(role => ['admin', 'co-admin', 'hoofd-admin'].includes(role))) {
+  setError('⛔ Alleen admins mogen deze pagina zien.')
+  return
+}
 
     // Clubs ophalen
     const fetchClubs = async () => {
