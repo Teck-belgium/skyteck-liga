@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore'
 import { useAuth } from '@/context/AuthContext'
 import { useRequireVerifiedUser } from '@/lib/authCheck'
 import { useRouter } from 'next/navigation'
@@ -21,29 +21,55 @@ type ClubData = {
 
 export default function ManageUsersPage() {
   const checked = useRequireVerifiedUser()
-  const { roles: userRoles, loading } = useAuth()
+  const { currentUser, loading } = useAuth()
   const router = useRouter()
-  
+
+  const [userRoles, setUserRoles] = useState<string[]>([])
   const [users, setUsers] = useState<UserData[]>([])
   const [clubs, setClubs] = useState<ClubData[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [loadingClubs, setLoadingClubs] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Direct log bij elke render
   console.log('🧪 render ManageUsersPage - checked, loading, userRoles:', checked, loading, userRoles)
 
   useEffect(() => {
-    console.log('🧪 useEffect triggered - checked, loading, userRoles:', checked, loading, userRoles)
+    const fetchUserRoles = async () => {
+      if (!currentUser) return
+      try {
+        const userRef = doc(db, 'users', currentUser.uid)
+        const userSnap = await getDoc(userRef)
+        if (userSnap.exists()) {
+          const data = userSnap.data()
+          const roles =
+            Array.isArray(data.roles)
+              ? data.roles
+              : typeof data.roles === 'string'
+              ? data.roles.split(',').map((r: string) => r.trim())
+              : []
 
+          console.log('✅ Rollen opgehaald uit Firestore:', roles)
+          setUserRoles(roles)
+        }
+      } catch (err) {
+        console.error('❌ Fout bij ophalen van rollen:', err)
+        setError('❌ Fout bij ophalen van gebruikersrollen')
+      }
+    }
+
+    if (checked && !loading) {
+      fetchUserRoles()
+    }
+  }, [checked, loading, currentUser])
+
+  useEffect(() => {
     if (!checked || loading) return
 
-    if (!Array.isArray(userRoles) || !userRoles.some(role => ['admin', 'co-admin', 'hoofd-admin'].includes(role))) {
-  setError('⛔ Alleen admins mogen deze pagina zien.')
-  return
-}
+    if (userRoles.length > 0 && !userRoles.some(role => ['admin', 'co-admin', 'hoofd-admin'].includes(role))) {
+      setError('⛔ Alleen admins mogen deze pagina zien.')
+      return
+    }
 
-    // Clubs ophalen
     const fetchClubs = async () => {
       setLoadingClubs(true)
       try {
@@ -62,8 +88,7 @@ export default function ManageUsersPage() {
         setLoadingClubs(false)
       }
     }
-    
-    // Users ophalen
+
     const fetchUsers = async () => {
       setLoadingUsers(true)
       setError(null)
@@ -86,16 +111,17 @@ export default function ManageUsersPage() {
       }
     }
 
-    fetchClubs()
-    fetchUsers()
+    if (userRoles.length > 0) {
+      fetchClubs()
+      fetchUsers()
+    }
   }, [checked, loading, userRoles])
 
-  // Rollen aanpassen (checkbox toggle)
   const toggleRole = async (userId: string, role: string) => {
     const user = users.find(u => u.id === userId)
     if (!user) return
 
-    let newRoles = user.roles.includes(role)
+    const newRoles = user.roles.includes(role)
       ? user.roles.filter(r => r !== role)
       : [...user.roles, role]
 
@@ -108,8 +134,7 @@ export default function ManageUsersPage() {
       console.error(err)
     }
   }
-  
-  // Clubs toggle
+
   const toggleClub = async (userId: string, clubId: string) => {
     const user = users.find(u => u.id === userId)
     if (!user) return
@@ -153,7 +178,7 @@ export default function ManageUsersPage() {
       {(loadingUsers || loadingClubs) ? (
         <p>🔄 Gegevens laden...</p>
       ) : (
-        <table className="w-full border border-gray-600 text-left">
+        <table className="w-full border border-gray-600 text-left mt-6">
           <thead>
             <tr>
               <th className="border border-gray-600 p-2">E-mail</th>
@@ -173,7 +198,7 @@ export default function ManageUsersPage() {
                       type="checkbox"
                       checked={user.roles.includes(role)}
                       onChange={() => toggleRole(user.id, role)}
-                      disabled={user.id === 'currentUserId'}
+                      disabled={user.id === currentUser?.uid}
                     />
                   </td>
                 ))}
